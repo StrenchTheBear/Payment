@@ -21,4 +21,9 @@ public class CustomerServiceImpl implements CustomerService {
         customerList.add(customer);
     }
 
+    @Override
+    public List<Customer> findCustomers() {
+        return customerList;
+    }
+
 }
