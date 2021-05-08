@@ -8,6 +8,7 @@ public class Card {
     private String cardSecurityCode;
     private String maturyDate;
     private String cardType;
+    private Integer customerId;
 
     public Integer getId() { return id; }
 
@@ -33,6 +34,10 @@ public class Card {
 
     public void setCardType(String cardType) { this.cardType = cardType; }
 
+    public Integer getCustomerId() { return customerId; }
+
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Card{");
@@ -42,6 +47,7 @@ public class Card {
         sb.append(", cardSecurityCode='").append(cardSecurityCode).append('\'');
         sb.append(", maturyDate='").append(maturyDate).append('\'');
         sb.append(", cardType='").append(cardType).append('\'');
+        sb.append(", customerId=").append(customerId);
         sb.append('}');
         return sb.toString();
     }

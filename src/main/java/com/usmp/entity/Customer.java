@@ -1,5 +1,6 @@
 package com.usmp.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Customer {
@@ -10,6 +11,10 @@ public class Customer {
     private String email;
     private String password;
     private List<Card> cards;
+
+    public Customer() {
+        cards = new ArrayList<>();
+    }
 
     public Integer getId() { return id; }
 
