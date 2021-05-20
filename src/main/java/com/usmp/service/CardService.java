@@ -7,7 +7,5 @@ import java.util.List;
 public interface CardService {
 
     List<Card> findCards();
-    boolean validateCard(String cardNumber);
-    void insertCustomerCard(Card card);
 
 }
