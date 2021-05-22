@@ -18,6 +18,11 @@ public class CardServiceImpl implements CardService {
         return this.cardRepository.findAll();
     }
 
+    @Override
+    public Card findByCardNumberAndExpirationDateAndCvcCode(String cardNumber, String expirationDate, Integer cvcCode) {
+        return cardRepository.findByCardNumberAndExpirationDateAndCvcCode(cardNumber, expirationDate, cvcCode).orElse(null);
+    }
+
     @Autowired
     public void setCardRepository(CardRepository cardRepository) {
         this.cardRepository = cardRepository;

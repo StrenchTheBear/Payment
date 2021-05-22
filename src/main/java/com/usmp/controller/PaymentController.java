@@ -2,6 +2,8 @@ package com.usmp.controller;
 
 import com.usmp.entity.Card;
 import com.usmp.entity.Customer;
+import com.usmp.entity.CustomerCard;
+import com.usmp.entity.dto.CardRequest;
 import com.usmp.service.CardService;
 import com.usmp.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -38,8 +41,7 @@ public class PaymentController {
         Customer newCustomer = null;
 
         if(result.hasErrors()) {
-            List<String> errors = result.getFieldErrors().stream().
-                    map(field -> "El campo '".concat(field.getField()).concat("' ").concat(field.getDefaultMessage())).collect(Collectors.toList());
+            List<String> errors = this.getErros(result);
             createCustomerMap.put("errors", errors);
             return new ResponseEntity<>(createCustomerMap, HttpStatus.BAD_REQUEST);
         }
@@ -63,10 +65,34 @@ public class PaymentController {
         return this.cardService.findCards();
     }
 
-    @PostMapping("/customer")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createCustomer(@RequestBody Customer customer) {
-        this.customerService.createCustomer(customer);
+    @PostMapping("/cards/register")
+    public ResponseEntity<?> registerCard(@Valid @RequestBody CardRequest cardRequest, BindingResult result) {
+
+        Map<String, Object> registerCardMap = createMap();
+
+        if(result.hasErrors()) {
+            List<String> errors = this.getErros(result);
+            registerCardMap.put("errors", errors);
+            return new ResponseEntity<>(registerCardMap, HttpStatus.BAD_REQUEST);
+        }
+
+         try {
+            Card card = this.cardService.findByCardNumberAndExpirationDateAndCvcCode(cardRequest.getCardNumber(), cardRequest.getExpirationDate(), cardRequest.getCvcCode());
+            if(Objects.isNull(card)) {
+                registerCardMap.put("message", "Los datos ingresados de la tarjeta no son los correctos");
+                return new ResponseEntity<>(registerCardMap, HttpStatus.NOT_FOUND);
+            }
+            CustomerCard customerCard = new CustomerCard();
+            customerCard.setCardNumber(cardRequest.getCardNumber());
+            Customer customer = new Customer();
+            customer.setId(cardRequest.getCustomerId());
+            customerCard.setCustomer(customer);
+
+         } catch (DataAccessException ex) {
+            registerCardMap.put("message", DATA_ACCESS_EXCEPTION_MESSAGE);
+            registerCardMap.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
+            return new ResponseEntity<>(registerCardMap, HttpStatus.INTERNAL_SERVER_ERROR);
+         }
     }
 
     @Autowired
@@ -77,5 +103,10 @@ public class PaymentController {
     public void setCardService(CardService cardService) { this.cardService = cardService; }
 
     private Map<String, Object> createMap() { return new HashMap<>(); }
+
+    private List<String> getErros(BindingResult result) {
+        return result.getFieldErrors().stream().
+                map(field -> "El campo '".concat(field.getField()).concat("' ").concat(field.getDefaultMessage())).collect(Collectors.toList());
+    }
 
 }
