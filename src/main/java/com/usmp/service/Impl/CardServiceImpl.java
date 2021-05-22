@@ -20,7 +20,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public Card findByCardNumberAndExpirationDateAndCvcCode(String cardNumber, String expirationDate, Integer cvcCode) {
-        return cardRepository.findByCardNumberAndExpirationDateAndCvcCode(cardNumber, expirationDate, cvcCode).orElse(null);
+        return cardRepository.findByCardNumberLikeAndExpirationDateLikeAndCvcCode(cardNumber, expirationDate, cvcCode).orElse(null);
     }
 
     @Autowired

@@ -23,6 +23,11 @@ public class CustomerServiceImpl implements CustomerService {
         return this.customerRepository.findAll();
     }
 
+    @Override
+    public Customer findById(Integer id) {
+        return this.customerRepository.findById(id).orElse(null);
+    }
+
     @Autowired
     public void setCustomerRepository(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;

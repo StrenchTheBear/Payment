@@ -8,5 +8,6 @@ public interface CustomerService {
 
     Customer createCustomer(Customer customer);
     List<Customer> findCustomers();
+    Customer findById(Integer id);
 
 }

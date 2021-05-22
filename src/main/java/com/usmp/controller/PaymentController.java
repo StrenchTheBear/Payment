@@ -5,6 +5,7 @@ import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
 import com.usmp.entity.dto.CardRequest;
 import com.usmp.service.CardService;
+import com.usmp.service.CustomerCardService;
 import com.usmp.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -28,6 +29,7 @@ public class PaymentController {
 
     private CustomerService customerService;
     private CardService cardService;
+    private CustomerCardService customerCardService;
 
     @GetMapping("/customers")
     @ResponseStatus(HttpStatus.OK)
@@ -77,17 +79,27 @@ public class PaymentController {
         }
 
          try {
-            Card card = this.cardService.findByCardNumberAndExpirationDateAndCvcCode(cardRequest.getCardNumber(), cardRequest.getExpirationDate(), cardRequest.getCvcCode());
+            Card card = this.cardService.findByCardNumberAndExpirationDateAndCvcCode(cardRequest.getCardNumber(), cardRequest.getExpirationDate(), Integer.parseInt(cardRequest.getCvcCode()));
             if(Objects.isNull(card)) {
                 registerCardMap.put("message", "Los datos ingresados de la tarjeta no son los correctos");
                 return new ResponseEntity<>(registerCardMap, HttpStatus.NOT_FOUND);
             }
+
             CustomerCard customerCard = new CustomerCard();
             customerCard.setCardNumber(cardRequest.getCardNumber());
             Customer customer = new Customer();
             customer.setId(cardRequest.getCustomerId());
             customerCard.setCustomer(customer);
 
+            this.customerCardService.insertCard(customerCard);
+
+            Customer customerFound = this.customerService.findById(cardRequest.getCustomerId());
+
+            String hiddenCardNumber = hideCardValue(cardRequest.getCardNumber());
+
+            registerCardMap.put("message", "Felicitaciones ".concat(customerFound.getName()).concat(" ").concat(customerFound.getFirstLastName()).
+                    concat(" tu tarjeta ").concat(hiddenCardNumber).concat(" fue registrada con éxito"));
+            return new ResponseEntity<>(registerCardMap, HttpStatus.CREATED);
          } catch (DataAccessException ex) {
             registerCardMap.put("message", DATA_ACCESS_EXCEPTION_MESSAGE);
             registerCardMap.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
@@ -101,12 +113,18 @@ public class PaymentController {
     }
     @Autowired
     public void setCardService(CardService cardService) { this.cardService = cardService; }
+    @Autowired
+    public void setCustomerCardService(CustomerCardService customerCardService) { this.customerCardService = customerCardService; }
 
     private Map<String, Object> createMap() { return new HashMap<>(); }
 
     private List<String> getErros(BindingResult result) {
         return result.getFieldErrors().stream().
                 map(field -> "El campo '".concat(field.getField()).concat("' ").concat(field.getDefaultMessage())).collect(Collectors.toList());
+    }
+
+    private String hideCardValue(String cardNumber) {
+        return "**** **** **** ".concat(cardNumber.substring(12));
     }
 
 }
