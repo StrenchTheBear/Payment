@@ -2,10 +2,7 @@ package com.usmp.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -18,6 +15,7 @@ public class Card {
     private String cardNumber;
     @Column(name = "nombre")
     private String name;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "fecha_registro")
     private Date registrationDate;
     @Column(name = "fecha_expiracion")
@@ -26,16 +24,11 @@ public class Card {
     private Integer cvcCode;
     @Column(name = "saldo")
     private BigDecimal balance;
-    @Column(name = "numero_cuenta")
-    private String accountNumber;
-    @Column(name = "codigo_interbancario")
-    private String interbankCode;
 
     public String getCardNumber() { return cardNumber; }
     public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getRegistrationDate() { return registrationDate; }
     public void setRegistrationDate(Date registrationDate) { this.registrationDate = registrationDate; }
     public String getExpirationDate() { return expirationDate; }
@@ -44,10 +37,6 @@ public class Card {
     public void setCvcCode(Integer cvcCode) { this.cvcCode = cvcCode; }
     public BigDecimal getBalance() { return balance; }
     public void setBalance(BigDecimal balance) { this.balance = balance; }
-    public String getAccountNumber() { return accountNumber; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
-    public String getInterbankCode() { return interbankCode; }
-    public void setInterbankCode(String interbankCode) { this.interbankCode = interbankCode; }
 
     @Override
     public String toString() {
@@ -58,8 +47,6 @@ public class Card {
         sb.append(", expirationDate='").append(expirationDate).append('\'');
         sb.append(", cvcCode=").append(cvcCode);
         sb.append(", balance=").append(balance);
-        sb.append(", accountNumber='").append(accountNumber).append('\'');
-        sb.append(", interbankCode='").append(interbankCode).append('\'');
         sb.append('}');
         return sb.toString();
     }

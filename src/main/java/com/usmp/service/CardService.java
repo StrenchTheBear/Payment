@@ -7,6 +7,6 @@ import java.util.List;
 public interface CardService {
 
     List<Card> findCards();
-    Card findByCardNumberAndExpirationDateAndCvcCode(String cardNumber, String expirationDate, Integer cvcCode);
+    Card findByNameAndCardNumberAndExpirationDate(String name, String cardNumber, String expirationDate);
 
 }

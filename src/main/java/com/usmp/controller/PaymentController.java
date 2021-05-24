@@ -3,7 +3,7 @@ package com.usmp.controller;
 import com.usmp.entity.Card;
 import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
-import com.usmp.entity.dto.CardRequest;
+import com.usmp.entity.dto.RegisterCardRequest;
 import com.usmp.service.CardService;
 import com.usmp.service.CustomerCardService;
 import com.usmp.service.CustomerService;
@@ -68,7 +68,7 @@ public class PaymentController {
     }
 
     @PostMapping("/cards/register")
-    public ResponseEntity<?> registerCard(@Valid @RequestBody CardRequest cardRequest, BindingResult result) {
+    public ResponseEntity<?> registerCard(@Valid @RequestBody RegisterCardRequest registerCardRequest, BindingResult result) {
 
         Map<String, Object> registerCardMap = createMap();
 
@@ -79,23 +79,24 @@ public class PaymentController {
         }
 
          try {
-            Card card = this.cardService.findByCardNumberAndExpirationDateAndCvcCode(cardRequest.getCardNumber(), cardRequest.getExpirationDate(), Integer.parseInt(cardRequest.getCvcCode()));
+            Card card = this.cardService.findByNameAndCardNumberAndExpirationDate(registerCardRequest.getCardName(),
+                    registerCardRequest.getCardNumber(), registerCardRequest.getExpirationDate());
             if(Objects.isNull(card)) {
-                registerCardMap.put("message", "Los datos ingresados de la tarjeta no son los correctos");
+                registerCardMap.put("message", "Los datos ingresados de la tarjeta no son los correctos.");
                 return new ResponseEntity<>(registerCardMap, HttpStatus.NOT_FOUND);
             }
 
             CustomerCard customerCard = new CustomerCard();
-            customerCard.setCardNumber(cardRequest.getCardNumber());
+            customerCard.setCardNumber(registerCardRequest.getCardNumber());
             Customer customer = new Customer();
-            customer.setId(cardRequest.getCustomerId());
+            customer.setId(registerCardRequest.getCustomerId());
             customerCard.setCustomer(customer);
 
             this.customerCardService.insertCard(customerCard);
 
-            Customer customerFound = this.customerService.findById(cardRequest.getCustomerId());
+            Customer customerFound = this.customerService.findById(registerCardRequest.getCustomerId());
 
-            String hiddenCardNumber = hideCardValue(cardRequest.getCardNumber());
+            String hiddenCardNumber = hideCardValue(registerCardRequest.getCardNumber());
 
             registerCardMap.put("message", "Felicitaciones ".concat(customerFound.getName()).concat(" ").concat(customerFound.getFirstLastName()).
                     concat(" tu tarjeta ").concat(hiddenCardNumber).concat(" fue registrada con éxito"));

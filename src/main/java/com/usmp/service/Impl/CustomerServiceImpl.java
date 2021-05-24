@@ -28,6 +28,11 @@ public class CustomerServiceImpl implements CustomerService {
         return this.customerRepository.findById(id).orElse(null);
     }
 
+    @Override
+    public boolean findByIdAndDni(Integer id, String dni) {
+        return this.customerRepository.findByIdAndDniLike(id, dni).isPresent();
+    }
+
     @Autowired
     public void setCustomerRepository(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;

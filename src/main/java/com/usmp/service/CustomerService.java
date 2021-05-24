@@ -9,5 +9,6 @@ public interface CustomerService {
     Customer createCustomer(Customer customer);
     List<Customer> findCustomers();
     Customer findById(Integer id);
+    boolean findByIdAndDni(Integer id, String dni);
 
 }

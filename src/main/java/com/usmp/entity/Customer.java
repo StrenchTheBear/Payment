@@ -33,6 +33,7 @@ public class Customer {
     @Column(name = "apellido_materno")
     private String secondLastName;
 
+    @NotNull
     private String dni;
 
     @NotNull
