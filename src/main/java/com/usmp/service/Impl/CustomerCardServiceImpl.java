@@ -6,6 +6,10 @@ import com.usmp.service.CustomerCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Service
 public class CustomerCardServiceImpl implements CustomerCardService {
 
@@ -14,6 +18,15 @@ public class CustomerCardServiceImpl implements CustomerCardService {
     @Override
     public CustomerCard insertCard(CustomerCard customerCard) {
         return this.customerCardRepository.save(customerCard);
+    }
+
+    @Override
+    public List<CustomerCard> findCustomerCards(Integer customerId) {
+        List<CustomerCard> customerCards = this.customerCardRepository.findByCustomer_Id(customerId);
+        if(isEmpty(customerCards)) {
+            return null;
+        }
+        return customerCards;
     }
 
     @Autowired

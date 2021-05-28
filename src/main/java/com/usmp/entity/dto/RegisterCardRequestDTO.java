@@ -3,7 +3,7 @@ package com.usmp.entity.dto;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class RegisterCardRequest {
+public class RegisterCardRequestDTO {
 
     @NotNull
     private String cardName;

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Service
 public class CardServiceImpl implements CardService {
 
@@ -21,6 +23,15 @@ public class CardServiceImpl implements CardService {
     @Override
     public Card findByNameAndCardNumberAndExpirationDate(String name, String cardNumber, String expirationDate) {
         return cardRepository.findByNameLikeAndCardNumberLikeAndExpirationDateLike(name, cardNumber, expirationDate).orElse(null);
+    }
+
+    @Override
+    public List<Card> findCardsByNumbers(List<String> cardsNumber) {
+        List<Card> cards = this.cardRepository.findByCardNumberIn(cardsNumber);
+        if(isEmpty(cards)) {
+            return null;
+        }
+        return cards;
     }
 
     @Autowired

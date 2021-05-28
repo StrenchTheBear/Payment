@@ -45,9 +45,6 @@ public class Customer {
     @Column(name = "contrasena")
     private String password;
 
-    @Transient
-    private List<Card> cards;
-
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getName() { return name; }
@@ -62,8 +59,6 @@ public class Customer {
     public void setEmail(String email) { this.email = email; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-    public List<Card> getCards() { return cards; }
-    public void setCards(List<Card> cards) { this.cards = cards; }
 
     @Override
     public String toString() {
@@ -75,7 +70,6 @@ public class Customer {
         sb.append(", dni='").append(dni).append('\'');
         sb.append(", email='").append(email).append('\'');
         sb.append(", password='").append(password).append('\'');
-        sb.append(", cards=").append(cards);
         sb.append('}');
         return sb.toString();
     }

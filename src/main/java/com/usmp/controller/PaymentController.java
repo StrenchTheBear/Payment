@@ -3,7 +3,10 @@ package com.usmp.controller;
 import com.usmp.entity.Card;
 import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
-import com.usmp.entity.dto.RegisterCardRequest;
+import com.usmp.entity.dto.CardInfoDTO;
+import com.usmp.entity.dto.CustomerDTO;
+import com.usmp.entity.dto.ListCardsResponseDTO;
+import com.usmp.entity.dto.RegisterCardRequestDTO;
 import com.usmp.service.CardService;
 import com.usmp.service.CustomerCardService;
 import com.usmp.service.CustomerService;
@@ -68,7 +71,7 @@ public class PaymentController {
     }
 
     @PostMapping("/cards/register")
-    public ResponseEntity<?> registerCard(@Valid @RequestBody RegisterCardRequest registerCardRequest, BindingResult result) {
+    public ResponseEntity<?> registerCard(@Valid @RequestBody RegisterCardRequestDTO registerCardRequest, BindingResult result) {
 
         Map<String, Object> registerCardMap = createMap();
 
@@ -106,6 +109,32 @@ public class PaymentController {
             registerCardMap.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
             return new ResponseEntity<>(registerCardMap, HttpStatus.INTERNAL_SERVER_ERROR);
          }
+    }
+
+    @GetMapping("/customers/cards/{customerId}")
+    public ResponseEntity<?> getCustomerCards(@PathVariable Integer customerId) {
+        List<CustomerCard> customerCards = this.customerCardService.findCustomerCards(customerId);
+
+        Map<String, Object> getCustomerCardsMap = createMap();
+
+        if(Objects.isNull(customerCards)) {
+            getCustomerCardsMap.put("message", "Aún no tiene ninguna tarjeta registrada en el sistema");
+            return new ResponseEntity<>(getCustomerCardsMap, HttpStatus.NO_CONTENT);
+        }
+
+        List<String> cardsNumber = customerCards.stream().map(card -> card.getCardNumber()).collect(Collectors.toList());
+
+        List<Card> cards = this.cardService.findCardsByNumbers(cardsNumber);
+
+        ListCardsResponseDTO listCards = new ListCardsResponseDTO();
+        listCards.setCustomer(new CustomerDTO(customerCards.get(0).getCustomer().getName(), customerCards.get(0).getCustomer().getFirstLastName()));
+
+        List<CardInfoDTO> cardsInfo = cards.stream().map(element -> new CardInfoDTO(element.getName(), element.getCardNumber())).collect(Collectors.toList());
+        listCards.setCards(cardsInfo);
+
+        getCustomerCardsMap.put("message", "Usted tiene ".concat(String.valueOf(customerCards.size())).concat(" tarjetas registradas"));
+        getCustomerCardsMap.put("cards", listCards);
+        return new ResponseEntity<>(getCustomerCardsMap, HttpStatus.OK);
     }
 
     @Autowired
