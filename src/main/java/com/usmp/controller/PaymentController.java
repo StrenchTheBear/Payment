@@ -137,6 +137,18 @@ public class PaymentController {
         return new ResponseEntity<>(getCustomerCardsMap, HttpStatus.OK);
     }
 
+    @DeleteMapping("/cards/{cardNumber}")
+    public ResponseEntity<?> deleteCustomerCard(@PathVariable String cardNumber) {
+        Map<String, Object> deleteCustomerCardMap = createMap();
+        if(!this.customerCardService.findByCardNumber(cardNumber)) {
+            deleteCustomerCardMap.put("message", "No se puede eliminar la tarjeta porque no está registrada");
+            return new ResponseEntity<>(deleteCustomerCardMap, HttpStatus.NOT_FOUND);
+        }
+        this.customerCardService.deleteByCustomerNumber(cardNumber);
+        deleteCustomerCardMap.put("message", "La operación se realizó con éxito");
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @Autowired
     public void setCustomerService(CustomerService customerService) {
         this.customerService = customerService;

@@ -1,5 +1,6 @@
 package com.usmp.service.Impl;
 
+import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
 import com.usmp.repository.CustomerCardRepository;
 import com.usmp.service.CustomerCardService;
@@ -27,6 +28,16 @@ public class CustomerCardServiceImpl implements CustomerCardService {
             return null;
         }
         return customerCards;
+    }
+
+    @Override
+    public boolean findByCardNumber(String cardNumber) {
+        return this.customerCardRepository.existsById(cardNumber);
+    }
+
+    @Override
+    public void deleteByCustomerNumber(String cardNumber) {
+        this.customerCardRepository.deleteByCardNumberLike(cardNumber);
     }
 
     @Autowired
