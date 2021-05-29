@@ -3,6 +3,7 @@ package com.usmp.controller;
 import com.usmp.entity.Card;
 import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
+import com.usmp.entity.Payment;
 import com.usmp.entity.dto.CardInfoDTO;
 import com.usmp.entity.dto.CustomerDTO;
 import com.usmp.entity.dto.ListCardsResponseDTO;
@@ -10,6 +11,7 @@ import com.usmp.entity.dto.RegisterCardRequestDTO;
 import com.usmp.service.CardService;
 import com.usmp.service.CustomerCardService;
 import com.usmp.service.CustomerService;
+import com.usmp.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class PaymentController {
     private CustomerService customerService;
     private CardService cardService;
     private CustomerCardService customerCardService;
+    private PaymentService paymentService;
 
     @GetMapping("/customers")
     @ResponseStatus(HttpStatus.OK)
@@ -46,7 +49,7 @@ public class PaymentController {
         Customer newCustomer = null;
 
         if(result.hasErrors()) {
-            List<String> errors = this.getErros(result);
+            List<String> errors = this.getErrors(result);
             createCustomerMap.put("errors", errors);
             return new ResponseEntity<>(createCustomerMap, HttpStatus.BAD_REQUEST);
         }
@@ -76,7 +79,7 @@ public class PaymentController {
         Map<String, Object> registerCardMap = createMap();
 
         if(result.hasErrors()) {
-            List<String> errors = this.getErros(result);
+            List<String> errors = this.getErrors(result);
             registerCardMap.put("errors", errors);
             return new ResponseEntity<>(registerCardMap, HttpStatus.BAD_REQUEST);
         }
@@ -141,12 +144,37 @@ public class PaymentController {
     public ResponseEntity<?> deleteCustomerCard(@PathVariable String cardNumber) {
         Map<String, Object> deleteCustomerCardMap = createMap();
         if(!this.customerCardService.findByCardNumber(cardNumber)) {
-            deleteCustomerCardMap.put("message", "No se puede eliminar la tarjeta porque no está registrada");
+            deleteCustomerCardMap.put("message", "La tarjeta a eliminar no se encuentra registrada");
             return new ResponseEntity<>(deleteCustomerCardMap, HttpStatus.NOT_FOUND);
         }
         this.customerCardService.deleteByCustomerNumber(cardNumber);
         deleteCustomerCardMap.put("message", "La operación se realizó con éxito");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> registerPayment(@RequestBody Payment payment, BindingResult result) {
+        Map<String, Object> registerPaymentMap = createMap();
+
+        if(result.hasErrors()) {
+            List<String> errors = this.getErrors(result);
+            registerPaymentMap.put("errors", errors);
+            return new ResponseEntity<>(registerPaymentMap, HttpStatus.BAD_REQUEST);
+        }
+
+//        Card card = this.cardService.findByCardNumber(payment.get)
+        return null;
+    }
+
+    private Map<String, Object> createMap() { return new HashMap<>(); }
+
+    private List<String> getErrors(BindingResult result) {
+        return result.getFieldErrors().stream().
+                map(field -> "El campo '".concat(field.getField()).concat("' ").concat(field.getDefaultMessage())).collect(Collectors.toList());
+    }
+
+    private String hideCardValue(String cardNumber) {
+        return "**** **** **** ".concat(cardNumber.substring(12));
     }
 
     @Autowired
@@ -157,16 +185,7 @@ public class PaymentController {
     public void setCardService(CardService cardService) { this.cardService = cardService; }
     @Autowired
     public void setCustomerCardService(CustomerCardService customerCardService) { this.customerCardService = customerCardService; }
-
-    private Map<String, Object> createMap() { return new HashMap<>(); }
-
-    private List<String> getErros(BindingResult result) {
-        return result.getFieldErrors().stream().
-                map(field -> "El campo '".concat(field.getField()).concat("' ").concat(field.getDefaultMessage())).collect(Collectors.toList());
-    }
-
-    private String hideCardValue(String cardNumber) {
-        return "**** **** **** ".concat(cardNumber.substring(12));
-    }
+    @Autowired
+    public void setPaymentService(PaymentService paymentService) { this.paymentService = paymentService; }
 
 }

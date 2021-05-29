@@ -22,7 +22,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public Card findByNameAndCardNumberAndExpirationDate(String name, String cardNumber, String expirationDate) {
-        return cardRepository.findByNameLikeAndCardNumberLikeAndExpirationDateLike(name, cardNumber, expirationDate).orElse(null);
+        return this.cardRepository.findByNameLikeAndCardNumberLikeAndExpirationDateLike(name, cardNumber, expirationDate).orElse(null);
     }
 
     @Override
@@ -32,6 +32,11 @@ public class CardServiceImpl implements CardService {
             return null;
         }
         return cards;
+    }
+
+    @Override
+    public Card findByCardNumber(String cardNumber) {
+        return this.cardRepository.findByCardNumberLike(cardNumber).orElse(null);
     }
 
     @Autowired
