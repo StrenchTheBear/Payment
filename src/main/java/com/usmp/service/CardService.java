@@ -9,6 +9,7 @@ public interface CardService {
     List<Card> findCards();
     Card findByNameAndCardNumberAndExpirationDate(String name, String cardNumber, String expirationDate);
     List<Card> findCardsByNumbers(List<String> cardsNumber);
-    Card findByCardNumber(String cardNumber);
+    Card validateCard(String name, String cardNumber, String expirationDate, Integer cvcCode);
+    Card updateCard(Card card);
 
 }

@@ -4,10 +4,7 @@ import com.usmp.entity.Card;
 import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
 import com.usmp.entity.Payment;
-import com.usmp.entity.dto.CardInfoDTO;
-import com.usmp.entity.dto.CustomerDTO;
-import com.usmp.entity.dto.ListCardsResponseDTO;
-import com.usmp.entity.dto.RegisterCardRequestDTO;
+import com.usmp.entity.dto.*;
 import com.usmp.service.CardService;
 import com.usmp.service.CustomerCardService;
 import com.usmp.service.CustomerService;
@@ -20,10 +17,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,6 +28,7 @@ import java.util.stream.Collectors;
 public class PaymentController {
 
     private static final String DATA_ACCESS_EXCEPTION_MESSAGE = "Ocurrió un error al realizar la operación en la base de datos";
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/yy");
 
     private CustomerService customerService;
     private CardService cardService;
@@ -84,7 +82,7 @@ public class PaymentController {
             return new ResponseEntity<>(registerCardMap, HttpStatus.BAD_REQUEST);
         }
 
-         try {
+        try {
             Card card = this.cardService.findByNameAndCardNumberAndExpirationDate(registerCardRequest.getCardName(),
                     registerCardRequest.getCardNumber(), registerCardRequest.getExpirationDate());
             if(Objects.isNull(card)) {
@@ -107,11 +105,11 @@ public class PaymentController {
             registerCardMap.put("message", "Felicitaciones ".concat(customerFound.getName()).concat(" ").concat(customerFound.getFirstLastName()).
                     concat(" tu tarjeta ").concat(hiddenCardNumber).concat(" fue registrada con éxito"));
             return new ResponseEntity<>(registerCardMap, HttpStatus.CREATED);
-         } catch (DataAccessException ex) {
+        } catch (DataAccessException ex) {
             registerCardMap.put("message", DATA_ACCESS_EXCEPTION_MESSAGE);
             registerCardMap.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
             return new ResponseEntity<>(registerCardMap, HttpStatus.INTERNAL_SERVER_ERROR);
-         }
+        }
     }
 
     @GetMapping("/customers/cards/{customerId}")
@@ -152,8 +150,9 @@ public class PaymentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> registerPayment(@RequestBody Payment payment, BindingResult result) {
+    @PostMapping("/transaction")
+    public ResponseEntity<?> registerPayment(@RequestBody PaymentDTO paymentDto, BindingResult result) {
+
         Map<String, Object> registerPaymentMap = createMap();
 
         if(result.hasErrors()) {
@@ -162,8 +161,61 @@ public class PaymentController {
             return new ResponseEntity<>(registerPaymentMap, HttpStatus.BAD_REQUEST);
         }
 
-//        Card card = this.cardService.findByCardNumber(payment.get)
-        return null;
+        try {
+
+            if(!this.customerService.findByIdAndDni(paymentDto.getCustomerId(), paymentDto.getDocumentNumber())) {
+                registerPaymentMap.put("message", "El DNI ingresado no es el correcto");
+                return new ResponseEntity<>(registerPaymentMap, HttpStatus.CONFLICT);
+            }
+
+            Card card = this.cardService.validateCard(paymentDto.getCardName(), paymentDto.getCardNumber(), paymentDto.getExpirationDate(), paymentDto.getCvcCode());
+
+            if(Objects.isNull(card)) {
+                registerPaymentMap.put("message", "Los datos ingresados de la tarjeta no son los correctos");
+                return new ResponseEntity<>(registerPaymentMap, HttpStatus.CONFLICT);
+            }
+
+            Date currentDate = new Date();
+            Date cardExpirationDate = null;
+            try {
+                cardExpirationDate = dateFormat.parse(card.getExpirationDate());
+            } catch (ParseException e) {}
+
+            if(currentDate.after(cardExpirationDate)) {
+                registerPaymentMap.put("message", "La tarjeta ya expiró. Ingrese otra tarjeta");
+                return new ResponseEntity<>(registerPaymentMap, HttpStatus.CONFLICT);
+            }
+
+            BigDecimal remainingAmount = card.getBalance().subtract(paymentDto.getAmount());
+            if(remainingAmount.compareTo(BigDecimal.ZERO) == -1) {
+                registerPaymentMap.put("message", "La tarjeta no cuenta con saldo suficiente");
+                return new ResponseEntity<>(registerPaymentMap, HttpStatus.CONFLICT);
+            }
+
+            card.setBalance(remainingAmount);
+
+            Card updatedCard = this.cardService.updateCard(card);
+
+            Payment payment = new Payment();
+            payment.setPaymentNumber(UUID.randomUUID().toString());
+            payment.setCard(updatedCard);
+            payment.setAmount(paymentDto.getAmount().doubleValue());
+            Customer customer = new Customer();
+            customer.setId(paymentDto.getCustomerId());
+            payment.setCustomer(customer);
+            payment.setPaymentDate(new Date());
+
+            this.paymentService.registerPayment(payment);
+
+            registerPaymentMap.put("message", "Felicitaciones, tu pago se realizó con éxito!");
+            registerPaymentMap.put("payment", new TransactionResponseDTO(payment.getPaymentNumber(), payment.getPaymentDate(), payment.getAmount()));
+            return new ResponseEntity<>(registerPaymentMap, HttpStatus.OK);
+        } catch (DataAccessException ex) {
+            registerPaymentMap.put("message", DATA_ACCESS_EXCEPTION_MESSAGE);
+            registerPaymentMap.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
+            return new ResponseEntity<>(registerPaymentMap, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     private Map<String, Object> createMap() { return new HashMap<>(); }

@@ -1,5 +1,7 @@
 package com.usmp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -34,6 +36,7 @@ public class Payment {
     public void setCard(Card card) { this.card = card; }
     public Customer getCustomer() { return customer; }
     public void setCustomer(Customer customer) { this.customer = customer; }
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     public Date getPaymentDate() { return paymentDate; }
     public void setPaymentDate(Date paymentDate) { this.paymentDate = paymentDate; }
     public Double getAmount() { return amount; }

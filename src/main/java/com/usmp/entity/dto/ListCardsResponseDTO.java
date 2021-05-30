@@ -1,7 +1,5 @@
 package com.usmp.entity.dto;
 
-import com.usmp.entity.Customer;
-
 import java.util.List;
 
 public class ListCardsResponseDTO {

@@ -1,6 +1,5 @@
 package com.usmp.service.Impl;
 
-import com.usmp.entity.Customer;
 import com.usmp.entity.CustomerCard;
 import com.usmp.repository.CustomerCardRepository;
 import com.usmp.service.CustomerCardService;

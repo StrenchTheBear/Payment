@@ -4,6 +4,6 @@ import com.usmp.entity.Payment;
 
 public interface PaymentService {
 
-    Payment registerPayment(Payment payment);
+    void registerPayment(Payment payment);
 
 }

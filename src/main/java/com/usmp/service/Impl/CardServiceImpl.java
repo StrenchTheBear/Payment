@@ -35,9 +35,15 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public Card findByCardNumber(String cardNumber) {
-        return this.cardRepository.findByCardNumberLike(cardNumber).orElse(null);
+    public Card validateCard(String name, String cardNumber, String expirationDate, Integer cvcCode) {
+        return this.cardRepository.findByNameLikeAndCardNumberLikeAndExpirationDateLikeAndCvcCode(name, cardNumber, expirationDate, cvcCode).orElse(null);
     }
+
+    @Override
+    public Card updateCard(Card card) {
+        return this.cardRepository.save(card);
+    }
+
 
     @Autowired
     public void setCardRepository(CardRepository cardRepository) {

@@ -10,6 +10,6 @@ public interface CardRepository extends JpaRepository<Card, String> {
 
     Optional<Card> findByNameLikeAndCardNumberLikeAndExpirationDateLike(String name, String cardNumber, String expirationDate);
     List<Card> findByCardNumberIn(List<String> cardsNumber);
-    Optional<Card> findByCardNumberLike(String cardNumber);
+    Optional<Card> findByNameLikeAndCardNumberLikeAndExpirationDateLikeAndCvcCode(String name, String cardNumber, String expirationDate, Integer cvcCode);
 
 }
