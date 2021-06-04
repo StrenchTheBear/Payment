@@ -1,14 +1,9 @@
 package com.usmp.controller;
 
-import com.usmp.entity.Card;
-import com.usmp.entity.Customer;
-import com.usmp.entity.CustomerCard;
-import com.usmp.entity.Payment;
+import com.usmp.entity.*;
 import com.usmp.entity.dto.*;
-import com.usmp.service.CardService;
-import com.usmp.service.CustomerCardService;
-import com.usmp.service.CustomerService;
-import com.usmp.service.PaymentService;
+import com.usmp.repository.ProfileRepository;
+import com.usmp.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -34,6 +29,7 @@ public class PaymentController {
     private CardService cardService;
     private CustomerCardService customerCardService;
     private PaymentService paymentService;
+    private ProfileService profileService;
 
     @GetMapping("/customers")
     @ResponseStatus(HttpStatus.OK)
@@ -44,7 +40,9 @@ public class PaymentController {
     @PostMapping("/customers/create")
     public ResponseEntity<?> create(@Valid @RequestBody Customer customer, BindingResult result) {
         Map<String, Object> createCustomerMap = createMap();
+
         Customer newCustomer = null;
+        Profile customerProfile = null;
 
         if(result.hasErrors()) {
             List<String> errors = this.getErrors(result);
@@ -54,6 +52,7 @@ public class PaymentController {
 
         try {
             newCustomer = this.customerService.createCustomer(customer);
+            customerProfile = this.profileService.createProfile(new Profile(newCustomer));
         } catch (DataAccessException ex) {
             createCustomerMap.put("message", DATA_ACCESS_EXCEPTION_MESSAGE);
             createCustomerMap.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
@@ -61,6 +60,7 @@ public class PaymentController {
         }
 
         createCustomerMap.put("customer", newCustomer);
+        createCustomerMap.put("profile", customerProfile.getProfile());
         createCustomerMap.put("message", "Tu registro se acaba de realizar con éxito!");
         return new ResponseEntity<>(createCustomerMap, HttpStatus.CREATED);
     }
@@ -239,5 +239,7 @@ public class PaymentController {
     public void setCustomerCardService(CustomerCardService customerCardService) { this.customerCardService = customerCardService; }
     @Autowired
     public void setPaymentService(PaymentService paymentService) { this.paymentService = paymentService; }
+    @Autowired
+    public void setProfileService(ProfileService profileService) { this.profileService = profileService; }
 
 }

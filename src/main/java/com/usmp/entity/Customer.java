@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -19,18 +20,22 @@ public class Customer {
     private Integer id;
 
     @NotNull
+    @NotEmpty
     @Column(name = "nombre")
     private String name;
 
     @NotNull
+    @NotEmpty
     @Column(name = "apellido_paterno")
     private String firstLastName;
 
     @NotNull
+    @NotEmpty
     @Column(name = "apellido_materno")
     private String secondLastName;
 
     @NotNull
+    @NotEmpty
     private String dni;
 
     @NotNull
@@ -39,6 +44,7 @@ public class Customer {
     private String email;
 
     @NotNull
+    @NotEmpty
     @Column(name = "contrasena")
     private String password;
 
