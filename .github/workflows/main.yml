@@ -1,0 +1,41 @@
+name: Java CI with Maven Deploy to heroku
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_webapp:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Build with Maven
+      run: mvn -B clean package --file pom.xml
+
+    - name: Build, Push and Release a Docker container to Heroku.
+      uses: gonuit/heroku-docker-deploy@v1.3.2 
+      with:
+
+          email: "acliv2904@yahoo.com"
+
+          heroku_api_key: "b2b8a5dc-0ee2-4abe-8542-9ede250db6a2"
+
+          heroku_app_name: "usmppayment-api"
+
+          dockerfile_directory: ./
+
+          dockerfile_name: DockerFile
+
+          docker_options: "--no-cache"
+
+          process_type: web
